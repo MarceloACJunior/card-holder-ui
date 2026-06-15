@@ -1,50 +1,98 @@
-# React + TypeScript + Vite
+# card-holder-ui
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Interface web (SPA) do ecossistema JazzTech. Consolida os 3 microsserviços numa única aplicação
+que guia o usuário pelo fluxo completo: **cadastrar cliente → solicitar análise de crédito →
+criar card holder → emitir e gerenciar cartões**.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **React 18** + **Vite 5** + **TypeScript**
+- **React Router 7** — roteamento
+- **Axios** — HTTP (uma instância por API)
+- **React Hook Form** + **Zod** — formulários e validação
+- **Tailwind CSS** — estilização
+- **react-hot-toast** — notificações
 
-## Expanding the ESLint configuration
+## Pré-requisitos
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+- **Node.js 18+**
+- As 3 APIs do ecossistema rodando (`client-api:8080`, `credit-analysis-api:9001`, `card-holder-api:9002`).
+  Veja o [README do card-holder-api](https://github.com/MarceloACJunior/card-holder-api) para subir tudo via Docker Compose.
 
-- Configure the top-level `parserOptions` property like this:
+## Rodando
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+```bash
+# 1. Instalar dependências
+npm install
+
+# 2. Configurar as URLs das APIs (copie o exemplo e ajuste se necessário)
+cp .env.example .env
+
+# 3. Subir em modo desenvolvimento
+npm run dev
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+Acesse **http://localhost:5173**.
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+> **Rede corporativa:** se o `npm install` falhar com erro de registry, rode antes:
+> ```powershell
+> $env:npm_config_registry = "https://registry.npmjs.org"
+> ```
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
+## Variáveis de ambiente
+
+Definidas em `.env` (use `.env.example` como base):
+
+| Variável | Padrão | Descrição |
+|----------|--------|-----------|
+| `VITE_CLIENT_API_URL` | `http://localhost:8080` | URL do `client-api` |
+| `VITE_CREDIT_ANALYSIS_API_URL` | `http://localhost:9001` | URL do `credit-analysis-api` |
+| `VITE_CARD_HOLDER_API_URL` | `http://localhost:9002` | URL do `card-holder-api` |
+
+> O `.env` está no `.gitignore`. As APIs precisam liberar CORS para `http://localhost:5173`
+> (já configurado via `CorsConfig` em cada serviço).
+
+## Scripts
+
+```bash
+npm run dev       # Servidor de desenvolvimento (HMR)
+npm run build     # Type-check + build de produção (gera dist/)
+npm run preview   # Pré-visualiza o build de produção
+npm run lint      # ESLint
 ```
+
+## Estrutura
+
+```
+src/
+├── api/          → instâncias Axios por microsserviço
+├── components/   → Layout, PageHeader, StatusBadge, ErrorMessage
+├── pages/
+│   ├── clients/      → listagem, criação e detalhe de clientes
+│   ├── analysis/     → listagem e solicitação de análise de crédito
+│   └── cardholders/  → listagem, criação, detalhe e emissão de cartões
+├── types/        → interfaces TypeScript dos DTOs
+├── App.tsx       → rotas
+└── main.tsx
+```
+
+## Fluxo de uso
+
+```
+1. Clientes      → cadastrar um cliente
+       ↓
+2. Análises      → solicitar análise de crédito para o cliente
+       ↓
+3. Card Holders  → criar um card holder (requer análise aprovada)
+       ↓
+4. Card Holders  → emitir cartões e gerenciar limites
+```
+
+## Ecossistema
+
+| Repositório | Porta | Função |
+|-------------|-------|--------|
+| [client-api](https://github.com/MarceloACJunior/client-api) | 8080 | Cadastro de clientes |
+| [credit-analysis-api](https://github.com/MarceloACJunior/credit-analysis-api) | 9001 | Análise de crédito |
+| [card-holder-api](https://github.com/MarceloACJunior/card-holder-api) | 9002 | Portadores e cartões (orquestra o Docker Compose) |
+| **card-holder-ui** | 5173 | **Este projeto** |
