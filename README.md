@@ -1,6 +1,6 @@
 # card-holder-ui
 
-Interface web (SPA) do ecossistema JazzTech. Consolida os 3 microsserviços numa única aplicação
+Interface web (SPA) do ecossistema CardApp. Consolida os 3 microsserviços numa única aplicação
 que guia o usuário pelo fluxo completo: **cadastrar cliente → solicitar análise de crédito →
 criar card holder → emitir e gerenciar cartões**.
 
